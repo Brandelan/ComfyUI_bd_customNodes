@@ -81,7 +81,7 @@ class bd_RandomRange:
         return outFloat, outInt
     
 
-class bd_RandomizeSettings:
+class bd_Settings:
     """
     A example node
 
@@ -135,7 +135,7 @@ class bd_RandomizeSettings:
                 "randomize": (["enable", "disable"],),
                 "variation_amount": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
-                "refiner_amount": (["FLOAT"], {"default": 0.1, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
+                "refiner_amount": ("FLOAT", {"default": 0.1, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
                 # "output": ("STRING", {
                 #     "multiline": False, #True if you want the field to look like the one on the ClipTextEncode node
                 #     "default": "0"
@@ -180,18 +180,18 @@ class bd_RandomizeSettings:
 
         #exit early  and just return the settings
         if randomize == "disable":
-            refiner_start = bd_RandomizeSettings.calc_refiner(steps, refiner_amount)
+            refiner_start = bd_Settings.calc_refiner(steps, refiner_amount)
             return (cfg, steps, denoise, refiner_start)
         
         
         #set our new seed
         random.seed(seed)
 
-        outcfg = bd_RandomizeSettings.randomize(cfg, variation_amount)
-        outsteps = math.floor(bd_RandomizeSettings.randomize(float(steps), variation_amount))
-        outdenoise = bd_RandomizeSettings.randomize(denoise, variation_amount)
-        outdenoise = bd_RandomizeSettings.clamp(outdenoise, 0.0, 1.0)        
-        refiner_start = bd_RandomizeSettings.calc_refiner(outsteps, refiner_amount)
+        outcfg = bd_Settings.randomize(cfg, variation_amount)
+        outsteps = math.floor(bd_Settings.randomize(float(steps), variation_amount))
+        outdenoise = bd_Settings.randomize(denoise, variation_amount)
+        outdenoise = bd_Settings.clamp(outdenoise, 0.0, 1.0)        
+        refiner_start = bd_Settings.calc_refiner(outsteps, refiner_amount)
 
 
         print(f"bd random cfg is {outcfg} and random step amount is {outsteps}, denoise amt is {outdenoise}, refiner start is {refiner_start}")
@@ -334,13 +334,15 @@ class bd_Sequencer:
 # NOTE: names should be globally unique
 NODE_CLASS_MAPPINGS = {
     "BD Random Range": bd_RandomRange,
-    "BD Random Settings": bd_RandomizeSettings,
+    "BD Random Settings": bd_Settings, #legacy
+    "BD Settings": bd_Settings,
     "BD Sequencer": bd_Sequencer
 }
 
 # A dictionary that contains the friendly/humanly readable titles for the nodes
 NODE_DISPLAY_NAME_MAPPINGS = {
     "bd_FloatRangeSlider": "BD Random Range",
-    "bd_RandomizeSettings": "BD Random Settings",
+    "bd_RandomizeSettings": "BD Random Settings", #legacy
+    "bd_RandomizeSettings": "BD Settings",
     "bd_Sequencer": "BD Sequencer"
 }
