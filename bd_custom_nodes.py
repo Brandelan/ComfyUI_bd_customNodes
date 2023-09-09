@@ -232,6 +232,151 @@ class bd_Settings:
     
 
 
+class bd_SettingsDraft:
+    """
+    A example node
+
+    Class methods
+    -------------
+    INPUT_TYPES (dict): 
+        Tell the main program input parameters of nodes.
+
+    Attributes
+    ----------
+    RETURN_TYPES (`tuple`): 
+        The type of each element in the output tulple.
+    RETURN_NAMES (`tuple`):
+        Optional: The name of each output in the output tulple.
+    FUNCTION (`str`):
+        The name of the entry-point method. For example, if `FUNCTION = "execute"` then it will run Example().execute()
+    OUTPUT_NODE ([`bool`]):
+        If this node is an output node that outputs a result/image from the graph. The SaveImage node is an example.
+        The backend iterates on these output nodes and tries to execute all their parents if their parent graph is properly connected.
+        Assumed to be False if not present.
+    CATEGORY (`str`):
+        The category the node should appear in the UI.
+    execute(s) -> tuple || None:
+        The entry point method. The name of this method must be the same as the value of property `FUNCTION`.
+        For example, if `FUNCTION = "execute"` then this method's name must be `execute`, if `FUNCTION = "foo"` then it must be `foo`.
+    """
+    def __init__(self):
+        pass
+    
+    @classmethod
+    def INPUT_TYPES(s):
+        """
+            Return a dictionary which contains config for all input fields.
+            Some types (string): "MODEL", "VAE", "CLIP", "CONDITIONING", "LATENT", "IMAGE", "INT", "STRING", "FLOAT".
+            Input types "INT", "STRING" or "FLOAT" are special values for fields on the node.
+            The type can be a list for selection.
+
+            Returns: `dict`:
+                - Key input_fields_group (`string`): Can be either required, hidden or optional. A node class must have property `required`
+                - Value input_fields (`dict`): Contains input fields config:
+                    * Key field_name (`string`): Name of a entry-point method's argument
+                    * Value field_config (`tuple`):
+                        + First value is a string indicate the type of field or a list for selection.
+                        + Secound value is a config for type "INT", "STRING" or "FLOAT".
+        """
+        return {
+            "required": {
+                "mode": (["final", "draft", "draft with variations"], {"default": "final"}),
+                "cfg": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 0xffffffffffffffff, "step": 0.01, "display": "number"}),
+                "steps": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+                "denoise": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
+                "variation_amount": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+                "refiner_amount": ("FLOAT", {"default": 0.1, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
+                # "output": ("STRING", {
+                #     "multiline": False, #True if you want the field to look like the one on the ClipTextEncode node
+                #     "default": "0"
+                # }),
+            },
+            "optional":{                
+                "custom_00": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
+                "custom_01": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
+                "custom_02": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
+                "custom_03": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
+            }
+            # "hidden":{
+            #     "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+            # }
+        }
+
+    RETURN_TYPES = ("FLOAT", "INT", "FLOAT", "INT", "INT", "FLOAT", "FLOAT", "FLOAT", "FLOAT")
+    RETURN_NAMES = ("cfg", "steps", "denoise", "refiner start", "var seed", "custom 00", "custom 01", "custom 02", "custom 03")
+    FUNCTION = "randomize_it"
+    OUTPUT_NODE = True
+    CATEGORY = "BD Nodes"
+
+    @staticmethod
+    def randomize(base : float, variation_amount: float) -> float: 
+        #get a random number in the range of [-1, 1], then reduce by our variation amount
+        rbase = random.random()
+        rbase = rbase * 2.0 - 1.0
+        rbase *= variation_amount
+
+        outval = base + (base * rbase)
+
+        return outval
+    
+    @staticmethod
+    def clamp(n : float|int, min: float|int, max: float|int) -> float|int:
+        if n < min:
+            return min
+        elif n > max:
+            return max
+        else:
+            return n
+        
+
+    @staticmethod
+    def calc_refiner(steps: int, refiner_amt: float):
+        refiner_start = steps - math.floor(float(steps) * refiner_amt)
+        return refiner_start
+    
+    @staticmethod
+    def randomize_it(mode, cfg, steps, variation_amount, denoise, seed, refiner_amount, custom_00, custom_01, custom_02, custom_03):
+
+        draft_amt = .3333
+
+        #if in draft mode, significantly lower the steps amount and remove variation. The point of draft mode is rapid iteration that we can then go back and add variation to
+        if(mode == "draft with variations"):
+            steps = math.floor(float(steps) * draft_amt)
+
+        elif(mode == "draft"):
+            steps = math.floor(float(steps) * draft_amt)
+            variation_amount = 0.0
+
+
+        #exit early  and just return the settings
+        if StaticLibrary.almostEqual(variation_amount, 0):
+            refiner_start = bd_Settings.calc_refiner(steps, refiner_amount)
+            print(f"bd settings: no variation amount supplied, using supplied values seed is {seed} cfg is {cfg} and random step amount is {steps}, denoise amt is {denoise}, refiner start is {refiner_start}, custom00 is {custom_00}, custom_01 is {custom_01}, custom_02 is {custom_02}, custom_03 is {custom_03}")
+            return (cfg, steps, denoise, refiner_start, seed, custom_00, custom_01, custom_02, custom_03)
+        
+        
+        #set our new seed
+        random.seed(seed)
+
+        outcfg = bd_Settings.randomize(cfg, variation_amount)
+        outcfg = round(outcfg, 2) # make the cfg a bit more simple
+        outsteps = math.floor(bd_Settings.randomize(float(steps), variation_amount))
+        outdenoise = bd_Settings.randomize(denoise, variation_amount)
+        outdenoise = bd_Settings.clamp(outdenoise, 0.0, 1.0)        
+        refiner_start = bd_Settings.calc_refiner(outsteps, refiner_amount)
+
+        out_custom00 = bd_Settings.randomize(custom_00, variation_amount)
+        out_custom01 = bd_Settings.randomize(custom_01, variation_amount)
+        out_custom02 = bd_Settings.randomize(custom_02, variation_amount)
+        out_custom03 = bd_Settings.randomize(custom_03, variation_amount)
+
+
+        print(f"bd settings: for variation amount {variation_amount} seed is {seed} cfg is {outcfg} and random step amount is {outsteps}, denoise amt is {outdenoise}, refiner start is {refiner_start}, custom00 is {out_custom00}, custom01 is {out_custom01}, custom02 is {out_custom02}, custom03 is {out_custom03}")
+
+        #output = str(outFloat)
+
+        return outcfg, outsteps, outdenoise, refiner_start, seed, out_custom00, out_custom01, out_custom02, out_custom03
 class bd_Sequencer:
     """
     A example node
@@ -363,16 +508,18 @@ class bd_Sequencer:
 # A dictionary that contains all nodes you want to export with their names
 # NOTE: names should be globally unique
 NODE_CLASS_MAPPINGS = {
-    "BD Random Range": bd_RandomRange,
+    "bd Random Range": bd_RandomRange,
     "BD Random Settings": bd_Settings, #legacy
-    "BD Settings": bd_Settings,
-    "BD Sequencer": bd_Sequencer
+    "bd Settings": bd_Settings,
+    "bd Sequencer": bd_Sequencer,
+    "bd Settings Draft": bd_SettingsDraft
 }
 
 # A dictionary that contains the friendly/humanly readable titles for the nodes
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "bd_FloatRangeSlider": "BD Random Range",
+    "bd_FloatRangeSlider": "bd Random Range",
     "bd_RandomizeSettings": "BD Random Settings", #legacy
-    "bd_RandomizeSettings": "BD Settings",
-    "bd_Sequencer": "BD Sequencer"
+    "bd_RandomizeSettings": "bd Settings",
+    "bd_Sequencer": "bd Sequencer",
+    "bd_SettingsDraft": "bd Settings Draft"
 }
