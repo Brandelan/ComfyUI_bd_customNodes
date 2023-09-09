@@ -135,6 +135,7 @@ class bd_RandomizeSettings:
                 "randomize": (["enable", "disable"],),
                 "variation_amount": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+                "refiner_amount": (["FLOAT"], {"default": 0.1, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
                 # "output": ("STRING", {
                 #     "multiline": False, #True if you want the field to look like the one on the ClipTextEncode node
                 #     "default": "0"
@@ -142,8 +143,8 @@ class bd_RandomizeSettings:
             },
         }
 
-    RETURN_TYPES = ("FLOAT", "INT", "FLOAT")
-    RETURN_NAMES = ("cfg", "steps", "denoise")
+    RETURN_TYPES = ("FLOAT", "INT", "FLOAT", "INT")
+    RETURN_NAMES = ("cfg", "steps", "denoise", "refiner start")
     FUNCTION = "randomize_it"
     OUTPUT_NODE = True
     CATEGORY = "BD Nodes"
@@ -167,13 +168,20 @@ class bd_RandomizeSettings:
             return max
         else:
             return n
+        
+
+    @staticmethod
+    def calc_refiner(steps: int, refiner_amt: float):
+        refiner_start = steps - math.floor(float(steps) * refiner_amt)
+        return refiner_start
     
     @staticmethod
-    def randomize_it(cfg, steps, variation_amount, denoise, seed, randomize):
+    def randomize_it(cfg, steps, variation_amount, denoise, seed, randomize, refiner_amount):
 
         #exit early  and just return the settings
         if randomize == "disable":
-            return (cfg, steps, denoise)
+            refiner_start = bd_RandomizeSettings.calc_refiner(steps, refiner_amount)
+            return (cfg, steps, denoise, refiner_start)
         
         
         #set our new seed
@@ -182,14 +190,15 @@ class bd_RandomizeSettings:
         outcfg = bd_RandomizeSettings.randomize(cfg, variation_amount)
         outsteps = math.floor(bd_RandomizeSettings.randomize(float(steps), variation_amount))
         outdenoise = bd_RandomizeSettings.randomize(denoise, variation_amount)
-        outdenoise = bd_RandomizeSettings.clamp(outdenoise, 0.0, 1.0)
+        outdenoise = bd_RandomizeSettings.clamp(outdenoise, 0.0, 1.0)        
+        refiner_start = bd_RandomizeSettings.calc_refiner(outsteps, refiner_amount)
 
 
-        print(f"bd random cfg is {outcfg} and random step amount is {outsteps}, denoise amt is {outdenoise}")
+        print(f"bd random cfg is {outcfg} and random step amount is {outsteps}, denoise amt is {outdenoise}, refiner start is {refiner_start}")
 
         #output = str(outFloat)
 
-        return outcfg, outsteps, outdenoise
+        return outcfg, outsteps, outdenoise, refiner_start
     
 
 
