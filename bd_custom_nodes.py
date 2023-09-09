@@ -1,3 +1,10 @@
+"""
+@author: Brandelan
+@title: bd Nodes
+@nickname: bd Nodes
+@description: This extension offers various custom nodes for some randomization and QOL.
+"""
+
 import math
 import random
 import re
@@ -141,13 +148,19 @@ class bd_Settings:
                 #     "default": "0"
                 # }),
             },
+            "optional":{                
+                "custom_00": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
+                "custom_01": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
+                "custom_02": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
+                "custom_03": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
+            }
             # "hidden":{
             #     "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
             # }
         }
 
-    RETURN_TYPES = ("FLOAT", "INT", "FLOAT", "INT", "INT")
-    RETURN_NAMES = ("cfg", "steps", "denoise", "refiner start", "var seed")
+    RETURN_TYPES = ("FLOAT", "INT", "FLOAT", "INT", "INT", "FLOAT", "FLOAT", "FLOAT", "FLOAT")
+    RETURN_NAMES = ("cfg", "steps", "denoise", "refiner start", "var seed", "custom 00", "custom 01", "custom 02", "custom 03")
     FUNCTION = "randomize_it"
     OUTPUT_NODE = True
     CATEGORY = "BD Nodes"
@@ -179,12 +192,12 @@ class bd_Settings:
         return refiner_start
     
     @staticmethod
-    def randomize_it(cfg, steps, variation_amount, denoise, seed, randomize, refiner_amount):
+    def randomize_it(cfg, steps, variation_amount, denoise, seed, randomize, refiner_amount, custom_00, custom_01, custom_02, custom_03):
 
         #exit early  and just return the settings
         if randomize == "disable":
             refiner_start = bd_Settings.calc_refiner(steps, refiner_amount)
-            return (cfg, steps, denoise, refiner_start, seed)
+            return (cfg, steps, denoise, refiner_start, seed, custom_00, custom_01, custom_02, custom_03)
         
         
         #set our new seed
@@ -197,12 +210,17 @@ class bd_Settings:
         outdenoise = bd_Settings.clamp(outdenoise, 0.0, 1.0)        
         refiner_start = bd_Settings.calc_refiner(outsteps, refiner_amount)
 
+        out_custom00 = bd_Settings.randomize(custom_00, variation_amount)
+        out_custom01 = bd_Settings.randomize(custom_01, variation_amount)
+        out_custom02 = bd_Settings.randomize(custom_02, variation_amount)
+        out_custom03 = bd_Settings.randomize(custom_03, variation_amount)
 
-        print(f"bd settings: seed is {seed} cfg is {outcfg} and random step amount is {outsteps}, denoise amt is {outdenoise}, refiner start is {refiner_start}")
+
+        print(f"bd settings: seed is {seed} cfg is {outcfg} and random step amount is {outsteps}, denoise amt is {outdenoise}, refiner start is {refiner_start}, custom00 is {out_custom00}, custom00 is {out_custom01}, custom00 is {out_custom02}, custom00 is {out_custom03}")
 
         #output = str(outFloat)
 
-        return outcfg, outsteps, outdenoise, refiner_start, seed
+        return outcfg, outsteps, outdenoise, refiner_start, seed, out_custom00, out_custom01, out_custom02, out_custom03
     
 
 
