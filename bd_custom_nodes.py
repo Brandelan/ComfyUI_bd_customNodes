@@ -134,16 +134,16 @@ class bd_Settings:
                 "denoise": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
                 "randomize": (["enable", "disable"],),
                 "variation_amount": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
-                #"seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
                 "refiner_amount": ("FLOAT", {"default": 0.1, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
                 # "output": ("STRING", {
                 #     "multiline": False, #True if you want the field to look like the one on the ClipTextEncode node
                 #     "default": "0"
                 # }),
             },
-            "hidden":{
-                "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
-            }
+            # "hidden":{
+            #     "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+            # }
         }
 
     RETURN_TYPES = ("FLOAT", "INT", "FLOAT", "INT", "INT")
