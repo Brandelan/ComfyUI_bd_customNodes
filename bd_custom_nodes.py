@@ -143,8 +143,8 @@ class bd_Settings:
             },
         }
 
-    RETURN_TYPES = ("FLOAT", "INT", "FLOAT", "INT")
-    RETURN_NAMES = ("cfg", "steps", "denoise", "refiner start")
+    RETURN_TYPES = ("FLOAT", "INT", "FLOAT", "INT", "INT")
+    RETURN_NAMES = ("cfg", "steps", "denoise", "refiner start", "seed")
     FUNCTION = "randomize_it"
     OUTPUT_NODE = True
     CATEGORY = "BD Nodes"
@@ -181,7 +181,7 @@ class bd_Settings:
         #exit early  and just return the settings
         if randomize == "disable":
             refiner_start = bd_Settings.calc_refiner(steps, refiner_amount)
-            return (cfg, steps, denoise, refiner_start)
+            return (cfg, steps, denoise, refiner_start, seed)
         
         
         #set our new seed
@@ -198,7 +198,7 @@ class bd_Settings:
 
         #output = str(outFloat)
 
-        return outcfg, outsteps, outdenoise, refiner_start
+        return outcfg, outsteps, outdenoise, refiner_start, seed
     
 
 
