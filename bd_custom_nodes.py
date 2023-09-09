@@ -134,17 +134,20 @@ class bd_Settings:
                 "denoise": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
                 "randomize": (["enable", "disable"],),
                 "variation_amount": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
-                "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+                #"seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
                 "refiner_amount": ("FLOAT", {"default": 0.1, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
                 # "output": ("STRING", {
                 #     "multiline": False, #True if you want the field to look like the one on the ClipTextEncode node
                 #     "default": "0"
                 # }),
             },
+            "hiden":{
+                "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+            }
         }
 
     RETURN_TYPES = ("FLOAT", "INT", "FLOAT", "INT", "INT")
-    RETURN_NAMES = ("cfg", "steps", "denoise", "refiner start", "seed")
+    RETURN_NAMES = ("cfg", "steps", "denoise", "refiner start", "var seed")
     FUNCTION = "randomize_it"
     OUTPUT_NODE = True
     CATEGORY = "BD Nodes"
@@ -188,13 +191,14 @@ class bd_Settings:
         random.seed(seed)
 
         outcfg = bd_Settings.randomize(cfg, variation_amount)
+        outcfg = round(outcfg, 2) # make the cfg a bit more simple
         outsteps = math.floor(bd_Settings.randomize(float(steps), variation_amount))
         outdenoise = bd_Settings.randomize(denoise, variation_amount)
         outdenoise = bd_Settings.clamp(outdenoise, 0.0, 1.0)        
         refiner_start = bd_Settings.calc_refiner(outsteps, refiner_amount)
 
 
-        print(f"bd random cfg is {outcfg} and random step amount is {outsteps}, denoise amt is {outdenoise}, refiner start is {refiner_start}")
+        print(f"bd settings: seed is {seed} cfg is {outcfg} and random step amount is {outsteps}, denoise amt is {outdenoise}, refiner start is {refiner_start}")
 
         #output = str(outFloat)
 
