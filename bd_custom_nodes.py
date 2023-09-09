@@ -510,16 +510,16 @@ class bd_Sequencer:
 NODE_CLASS_MAPPINGS = {
     "bd Random Range": bd_RandomRange,
     "BD Random Settings": bd_Settings, #legacy
-    "bd Settings": bd_Settings,
+    "bd Variable Settings": bd_Settings,
     "bd Sequencer": bd_Sequencer,
-    "bd Settings Draft": bd_SettingsDraft
+    "bd Variable Settings Draft": bd_SettingsDraft
 }
 
 # A dictionary that contains the friendly/humanly readable titles for the nodes
 NODE_DISPLAY_NAME_MAPPINGS = {
     "bd_FloatRangeSlider": "bd Random Range",
-    "bd_RandomizeSettings": "BD Random Settings", #legacy
-    "bd_RandomizeSettings": "bd Settings",
+    "bd_Settings": "BD Random Settings", #legacy
+    "bd_Settings": "bd Variable Settings",
     "bd_Sequencer": "bd Sequencer",
-    "bd_SettingsDraft": "bd Settings Draft"
+    "bd_SettingsDraft": "bd Variable Settings Draft"
 }
