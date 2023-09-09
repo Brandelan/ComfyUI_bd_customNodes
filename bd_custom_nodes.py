@@ -141,7 +141,7 @@ class bd_Settings:
                 #     "default": "0"
                 # }),
             },
-            "hiden":{
+            "hidden":{
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
             }
         }
