@@ -203,8 +203,8 @@ class bd_Settings:
 
         #exit early  and just return the settings
         if StaticLibrary.almostEqual(variation_amount, 0):
-            print(f"bd settings: no variation amount supplied, using supplied values seed is {seed} cfg is {cfg} and random step amount is {steps}, denoise amt is {denoise}, refiner start is {refiner_start}, custom00 is {custom_00}, custom_01 is {custom_01}, custom_02 is {custom_02}, custom_03 is {custom_03}")
             refiner_start = bd_Settings.calc_refiner(steps, refiner_amount)
+            print(f"bd settings: no variation amount supplied, using supplied values seed is {seed} cfg is {cfg} and random step amount is {steps}, denoise amt is {denoise}, refiner start is {refiner_start}, custom00 is {custom_00}, custom_01 is {custom_01}, custom_02 is {custom_02}, custom_03 is {custom_03}")
             return (cfg, steps, denoise, refiner_start, seed, custom_00, custom_01, custom_02, custom_03)
         
         
