@@ -203,7 +203,7 @@ class bd_Settings:
 
         #exit early  and just return the settings
         if StaticLibrary.almostEqual(variation_amount, 0):
-            print(f"bd settings: no variation amount supplied, using supplied values seed is {seed} cfg is {outcfg} and random step amount is {outsteps}, denoise amt is {outdenoise}, refiner start is {refiner_start}, custom00 is {out_custom00}, custom00 is {out_custom01}, custom00 is {out_custom02}, custom00 is {out_custom03}")
+            print(f"bd settings: no variation amount supplied, using supplied values seed is {seed} cfg is {cfg} and random step amount is {steps}, denoise amt is {denoise}, refiner start is {refiner_start}, custom00 is {custom_00}, custom_01 is {custom_01}, custom_02 is {custom_02}, custom_03 is {custom_03}")
             refiner_start = bd_Settings.calc_refiner(steps, refiner_amount)
             return (cfg, steps, denoise, refiner_start, seed, custom_00, custom_01, custom_02, custom_03)
         
@@ -224,7 +224,7 @@ class bd_Settings:
         out_custom03 = bd_Settings.randomize(custom_03, variation_amount)
 
 
-        print(f"bd settings: for variation amount {variation_amount} seed is {seed} cfg is {outcfg} and random step amount is {outsteps}, denoise amt is {outdenoise}, refiner start is {refiner_start}, custom00 is {out_custom00}, custom00 is {out_custom01}, custom00 is {out_custom02}, custom00 is {out_custom03}")
+        print(f"bd settings: for variation amount {variation_amount} seed is {seed} cfg is {outcfg} and random step amount is {outsteps}, denoise amt is {outdenoise}, refiner start is {refiner_start}, custom00 is {out_custom00}, custom01 is {out_custom01}, custom02 is {out_custom02}, custom03 is {out_custom03}")
 
         #output = str(outFloat)
 
