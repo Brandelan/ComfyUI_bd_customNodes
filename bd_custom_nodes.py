@@ -280,7 +280,7 @@ class bd_SettingsDraft:
         """
         return {
             "required": {
-                "mode": (["final", "draft", "draft with variations"], {"default": "final"}),
+                "mode": (["standard", "draft (no variations)", "standard (no variations)", "draft (with variations)"], {"default": "final"}),
                 "cfg": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 0xffffffffffffffff, "step": 0.01, "display": "number"}),
                 "steps": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
                 "denoise": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
@@ -341,12 +341,20 @@ class bd_SettingsDraft:
         draft_amt = .3333
 
         #if in draft mode, significantly lower the steps amount and remove variation. The point of draft mode is rapid iteration that we can then go back and add variation to
-        if(mode == "draft with variations"):
+        if(mode == "draft (with variations)"):
             steps = math.floor(float(steps) * draft_amt)
+            steps = steps if steps > 0 else  1
+            print(f"Working in draft mode with variations, steps reduced to {steps}")
 
-        elif(mode == "draft"):
+        elif(mode == "draft (no variations)"):
             steps = math.floor(float(steps) * draft_amt)
+            steps = steps if steps > 0 else  1
             variation_amount = 0.0
+            print(f"Working in draft mode, ignoring variations, steps reduced to {steps}, and variation amount reduced to {variation_amount}")
+
+        elif(mode == "standard (no variations)"):
+            variation_amount = 0.0
+            print(f"Working in standard no variations mode, variation amount reduced to {variation_amount}")
 
 
         #exit early  and just return the settings
