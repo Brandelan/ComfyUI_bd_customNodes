@@ -9,6 +9,14 @@ import math
 import random
 import re
 
+EPSILON = 0.00001
+
+class StaticLibrary:
+    def almostEqual(a: float, b: float):
+        if (abs(a - b) > EPSILON) :
+            return False        
+        return True
+
    
 
 class bd_RandomRange:
@@ -139,7 +147,6 @@ class bd_Settings:
                 "cfg": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 0xffffffffffffffff, "step": 0.01, "display": "number"}),
                 "steps": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
                 "denoise": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
-                "randomize": (["enable", "disable"],),
                 "variation_amount": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
                 "refiner_amount": ("FLOAT", {"default": 0.1, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
@@ -192,10 +199,11 @@ class bd_Settings:
         return refiner_start
     
     @staticmethod
-    def randomize_it(cfg, steps, variation_amount, denoise, seed, randomize, refiner_amount, custom_00, custom_01, custom_02, custom_03):
+    def randomize_it(cfg, steps, variation_amount, denoise, seed, refiner_amount, custom_00, custom_01, custom_02, custom_03):
 
         #exit early  and just return the settings
-        if randomize == "disable":
+        if StaticLibrary.almostEqual(variation_amount, 0):
+            print(f"bd settings: no variation amount supplied, using supplied values seed is {seed} cfg is {outcfg} and random step amount is {outsteps}, denoise amt is {outdenoise}, refiner start is {refiner_start}, custom00 is {out_custom00}, custom00 is {out_custom01}, custom00 is {out_custom02}, custom00 is {out_custom03}")
             refiner_start = bd_Settings.calc_refiner(steps, refiner_amount)
             return (cfg, steps, denoise, refiner_start, seed, custom_00, custom_01, custom_02, custom_03)
         
@@ -216,7 +224,7 @@ class bd_Settings:
         out_custom03 = bd_Settings.randomize(custom_03, variation_amount)
 
 
-        print(f"bd settings: seed is {seed} cfg is {outcfg} and random step amount is {outsteps}, denoise amt is {outdenoise}, refiner start is {refiner_start}, custom00 is {out_custom00}, custom00 is {out_custom01}, custom00 is {out_custom02}, custom00 is {out_custom03}")
+        print(f"bd settings: for variation amount {variation_amount} seed is {seed} cfg is {outcfg} and random step amount is {outsteps}, denoise amt is {outdenoise}, refiner start is {refiner_start}, custom00 is {out_custom00}, custom00 is {out_custom01}, custom00 is {out_custom02}, custom00 is {out_custom03}")
 
         #output = str(outFloat)
 
