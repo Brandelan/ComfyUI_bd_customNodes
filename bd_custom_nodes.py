@@ -292,9 +292,9 @@ class bd_SettingsDraft:
         """
         return {
             "required": {
-                "mode": (["standard", "draft (no variations)", "standard (no variations)", "draft (with variations)"], {"default": "final"}),
-                "cfg": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 0xffffffffffffffff, "step": 0.01, "display": "number"}),
-                "steps": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+                "mode": (["standard", "draft (no variations)", "standard (no variations)", "draft (with variations)"], {"default": "standard"}),
+                "cfg": ("FLOAT", {"default": 6.0, "min": 0.0, "max": 0xffffffffffffffff, "step": 0.01, "display": "number"}),
+                "steps": ("INT", {"default": 30, "min": 0, "max": 0xffffffffffffffff}),
                 "denoise": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
                 "variation_amount": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
@@ -395,7 +395,7 @@ class bd_SettingsDraft:
         if StaticLibrary.almostEqual(variation_amount, 0):
             refiner_start = bd_Settings.calc_refiner(steps, refiner_amount)
             print(f"{bcolors.OKCYAN}bd settings:{bcolors.ENDC}\n no variation amount supplied, using supplied values.\n seed is {seed}, cfg is {cfg}, random step amount is {steps}, denoise amt is {denoise}, refiner start is {refiner_start}, custom00 is {custom_00}, custom_01 is {custom_01}, custom_02 is {custom_02}, custom_03 is {custom_03}, width is {width}, height is {height}")
-            return (cfg, steps, denoise, refiner_start, seed, custom_00, custom_01, custom_02, custom_03, width, height)
+            return (cfg, steps, denoise, refiner_start, width, height, seed, custom_00, custom_01, custom_02, custom_03)
         
         
         #set our new seed
