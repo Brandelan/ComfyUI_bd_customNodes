@@ -11,6 +11,18 @@ import re
 
 EPSILON = 0.00001
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
 class StaticLibrary:
     def almostEqual(a: float, b: float):
         if (abs(a - b) > EPSILON) :
@@ -81,7 +93,7 @@ class bd_RandomRange:
     #RETURN_NAMES = ("image_output_name",)
     FUNCTION = "getRandomRange"
     OUTPUT_NODE = True
-    CATEGORY = "BD Nodes"
+    CATEGORY = "bd Nodes"
 
     @staticmethod
     def getRandomRange(min, max, seed):
@@ -170,7 +182,7 @@ class bd_Settings:
     RETURN_NAMES = ("cfg", "steps", "denoise", "refiner start", "var seed", "custom 00", "custom 01", "custom 02", "custom 03")
     FUNCTION = "randomize_it"
     OUTPUT_NODE = True
-    CATEGORY = "BD Nodes"
+    CATEGORY = "bd Nodes"
 
     @staticmethod
     def randomize(base : float, variation_amount: float) -> float: 
@@ -287,6 +299,13 @@ class bd_SettingsDraft:
                 "variation_amount": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
                 "refiner_amount": ("FLOAT", {"default": 0.1, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
+                "aspect_ratio": (
+                    ["1:1 Square (1024x1024)", 
+                     "7:4 Widescreen (1344x768)", 
+                     "13:19 Portrait (832x1216)", 
+                     "12:15 Wide Landscape (1536x640)",
+                     ], {"default": "1:1 Square (1024x1024)"}
+                     ),
                 # "output": ("STRING", {
                 #     "multiline": False, #True if you want the field to look like the one on the ClipTextEncode node
                 #     "default": "0"
@@ -303,11 +322,11 @@ class bd_SettingsDraft:
             # }
         }
 
-    RETURN_TYPES = ("FLOAT", "INT", "FLOAT", "INT", "INT", "FLOAT", "FLOAT", "FLOAT", "FLOAT")
-    RETURN_NAMES = ("cfg", "steps", "denoise", "refiner start", "var seed", "custom 00", "custom 01", "custom 02", "custom 03")
+    RETURN_TYPES = ("FLOAT", "INT", "FLOAT", "INT", "INT", "INT", "INT", "FLOAT", "FLOAT", "FLOAT", "FLOAT")
+    RETURN_NAMES = ("cfg", "steps", "denoise", "refiner start", "width", "height", "var seed", "custom 00", "custom 01", "custom 02", "custom 03")
     FUNCTION = "randomize_it"
     OUTPUT_NODE = True
-    CATEGORY = "BD Nodes"
+    CATEGORY = "bd Nodes"
 
     @staticmethod
     def randomize(base : float, variation_amount: float) -> float: 
@@ -336,9 +355,24 @@ class bd_SettingsDraft:
         return refiner_start
     
     @staticmethod
-    def randomize_it(mode, cfg, steps, variation_amount, denoise, seed, refiner_amount, custom_00, custom_01, custom_02, custom_03):
+    def randomize_it(mode, cfg, steps, variation_amount, denoise, seed, refiner_amount, custom_00, custom_01, custom_02, custom_03, aspect_ratio):
 
         draft_amt = .3333
+        width = 1024
+        height = 1024
+
+        if(aspect_ratio == "1:1 Square (1024x1024)"):
+            width = 1024
+            height = 1024
+        if(aspect_ratio == "7:4 Widescreen (1344x768)"):
+            width = 1344
+            height = 768
+        if(aspect_ratio == "13:19 Portrait (832x1216)"):
+            width = 832
+            height = 1216
+        if(aspect_ratio == "12:15 Wide Landscape (1536x640)"):
+            width = 1536
+            height = 640
 
         #if in draft mode, significantly lower the steps amount and remove variation. The point of draft mode is rapid iteration that we can then go back and add variation to
         if(mode == "draft (with variations)"):
@@ -360,8 +394,8 @@ class bd_SettingsDraft:
         #exit early  and just return the settings
         if StaticLibrary.almostEqual(variation_amount, 0):
             refiner_start = bd_Settings.calc_refiner(steps, refiner_amount)
-            print(f"bd settings: no variation amount supplied, using supplied values seed is {seed} cfg is {cfg} and random step amount is {steps}, denoise amt is {denoise}, refiner start is {refiner_start}, custom00 is {custom_00}, custom_01 is {custom_01}, custom_02 is {custom_02}, custom_03 is {custom_03}")
-            return (cfg, steps, denoise, refiner_start, seed, custom_00, custom_01, custom_02, custom_03)
+            print(f"{bcolors.OKCYAN}bd settings:{bcolors.ENDC}\n no variation amount supplied, using supplied values.\n seed is {seed}, cfg is {cfg}, random step amount is {steps}, denoise amt is {denoise}, refiner start is {refiner_start}, custom00 is {custom_00}, custom_01 is {custom_01}, custom_02 is {custom_02}, custom_03 is {custom_03}, width is {width}, height is {height}")
+            return (cfg, steps, denoise, refiner_start, seed, custom_00, custom_01, custom_02, custom_03, width, height)
         
         
         #set our new seed
@@ -384,7 +418,7 @@ class bd_SettingsDraft:
 
         #output = str(outFloat)
 
-        return outcfg, outsteps, outdenoise, refiner_start, seed, out_custom00, out_custom01, out_custom02, out_custom03
+        return outcfg, outsteps, outdenoise, refiner_start, seed, out_custom00, out_custom01, out_custom02, out_custom03, width, height
 class bd_Sequencer:
     """
     A example node
@@ -449,7 +483,7 @@ class bd_Sequencer:
     RETURN_NAMES = ("float", "int", "seed")
     FUNCTION = "sequence_it"
     OUTPUT_NODE = True
-    CATEGORY = "BD Nodes"
+    CATEGORY = "bd Nodes"
 
     @staticmethod
     def randomize(base : float, variation_amount: float) -> float: 
