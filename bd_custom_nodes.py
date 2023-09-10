@@ -394,7 +394,10 @@ class bd_SettingsDraft:
         #exit early  and just return the settings
         if StaticLibrary.almostEqual(variation_amount, 0):
             refiner_start = bd_Settings.calc_refiner(steps, refiner_amount)
-            print(f"{bcolors.OKCYAN}bd settings:{bcolors.ENDC}\n no variation amount supplied, using supplied values.\n seed is {seed}, cfg is {cfg}, random step amount is {steps}, denoise amt is {denoise}, refiner start is {refiner_start}, custom00 is {custom_00}, custom_01 is {custom_01}, custom_02 is {custom_02}, custom_03 is {custom_03}, width is {width}, height is {height}")
+            print(f"{bcolors.OKCYAN}bd settings:{bcolors.ENDC}\n" +
+                  f"no variation amount supplied, using supplied values.\n" + 
+                  f"seed is {seed}, cfg is {cfg}, random step amount is {steps}, denoise amt is {denoise}, refiner start is {refiner_start},\n" + 
+                  f"custom00 is {custom_00}, custom_01 is {custom_01}, custom_02 is {custom_02}, custom_03 is {custom_03}, width is {width}, height is {height}")
             return (cfg, steps, denoise, refiner_start, width, height, seed, custom_00, custom_01, custom_02, custom_03)
         
         
@@ -414,11 +417,12 @@ class bd_SettingsDraft:
         out_custom03 = bd_Settings.randomize(custom_03, variation_amount)
 
 
-        print(f"bd settings: for variation amount {variation_amount} seed is {seed} cfg is {outcfg} and random step amount is {outsteps}, denoise amt is {outdenoise}, refiner start is {refiner_start}, custom00 is {out_custom00}, custom01 is {out_custom01}, custom02 is {out_custom02}, custom03 is {out_custom03}")
+        print(f"{bcolors.OKCYAN}bd settings:{bcolors.ENDC}\n" +
+              f"for variation amount {variation_amount}:\n" + 
+              f"seed is {seed}, cfg is {outcfg}, random step amount is {outsteps}, denoise amt is {outdenoise}, refiner start is {refiner_start},\n" + 
+              f"custom00 is {out_custom00}, custom_01 is {out_custom01}, custom_02 is {out_custom02}, custom_03 is {out_custom03}, width is {width}, height is {height}")
 
-        #output = str(outFloat)
-
-        return outcfg, outsteps, outdenoise, refiner_start, seed, out_custom00, out_custom01, out_custom02, out_custom03, width, height
+        return outcfg, outsteps, outdenoise, refiner_start, width, height, seed, out_custom00, out_custom01, out_custom02, out_custom03
 class bd_Sequencer:
     """
     A example node
