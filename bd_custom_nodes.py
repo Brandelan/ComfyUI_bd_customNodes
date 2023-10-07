@@ -396,7 +396,7 @@ class bd_SettingsDraft:
             refiner_start = bd_Settings.calc_refiner(steps, refiner_amount)
             print(f"{bcolors.OKCYAN}bd settings:{bcolors.ENDC}\n" +
                   f"no variation amount supplied, using supplied values.\n" + 
-                  f"seed is {seed}, cfg is {cfg}, random step amount is {steps}, img2img_strength amt is {img2img_strength}, refiner start is {refiner_start},\n" + 
+                  f"seed is {seed}, cfg is {cfg}, random step amount is {steps}, img2img_strength amt is {img2img_strength}, base start step is {out_start_step}, refiner start is {refiner_start},\n" + 
                   f"custom00 is {control_net_strength}, custom_01 is {custom_01}, custom_02 is {custom_02}, custom_03 is {custom_03}, width is {width}, height is {height}")
             return (cfg, steps, img2img_strength, refiner_start, width, height, seed, control_net_strength, custom_01, custom_02, custom_03)
         
@@ -425,7 +425,7 @@ class bd_SettingsDraft:
 
         print(f"{bcolors.OKCYAN}bd settings:{bcolors.ENDC}\n" +
               f"for variation amount {variation_amount}:\n" + 
-              f"seed is {seed}, cfg is {outcfg}, random step amount is {outsteps}, denoise amt is {ran_img2img_strength}, refiner start is {refiner_start},\n" + 
+              f"seed is {seed}, cfg is {outcfg}, random step amount is {outsteps}, denoise amt is {ran_img2img_strength}, base start step is {out_start_step}, refiner start is {refiner_start},\n" + 
               f"custom00 is {out_control_net_strength}, custom_01 is {custom_01}, custom_02 is {out_custom02}, custom_03 is {out_custom03}, width is {width}, height is {height}")
 
         return outcfg, outsteps, out_start_step, refiner_start, width, height, seed, out_control_net_strength, out_custom01, out_custom02, out_custom03
