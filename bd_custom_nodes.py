@@ -316,8 +316,8 @@ class bd_SettingsDraft:
                 # }),
             },
             "optional":{                
-                "control_net_strength": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  1.0, "step": 0.01, "display": "number"}),
                 "img2img_strength": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
+                "custom_00": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  1.0, "step": 0.01, "display": "number"}),
                 "custom_01": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
                 "custom_02": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
                 "custom_03": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
@@ -328,7 +328,7 @@ class bd_SettingsDraft:
         }
 
     RETURN_TYPES = ("FLOAT", "INT", "INT", "INT", "INT", "INT", "INT", "FLOAT", "FLOAT", "FLOAT", "FLOAT","LATENT")
-    RETURN_NAMES = ("cfg", "steps", "start at step", "refiner start", "width", "height", "var seed", "controlnet strength", "custom 01", "custom 02", "custom 03","LATENT")
+    RETURN_NAMES = ("cfg", "steps", "start at step", "refiner start", "width", "height", "var seed", "custom 00", "custom 01", "custom 02", "custom 03","LATENT")
     FUNCTION = "randomize_it"
     OUTPUT_NODE = True
     CATEGORY = "bd Nodes"
@@ -360,7 +360,7 @@ class bd_SettingsDraft:
         return refiner_start
     
     @staticmethod
-    def randomize_it(mode, cfg, steps, variation_amount, img2img_strength, seed, refiner_amount, control_net_strength, custom_01, custom_02, custom_03, aspect_ratio, txt2img_switch, txt2img, img2img):
+    def randomize_it(mode, cfg, steps, variation_amount, img2img_strength, seed, refiner_amount, custom_00, custom_01, custom_02, custom_03, aspect_ratio, txt2img_switch, txt2img, img2img):
 
         draft_amt = .3333
         width = 1024
@@ -405,8 +405,8 @@ class bd_SettingsDraft:
             print(f"{bcolors.OKCYAN}bd settings:{bcolors.ENDC}\n" +
                   f"no variation amount supplied, using supplied values.\n" + 
                   f"seed is {seed}, cfg is {cfg}, random step amount is {steps}, img2img_strength amt is {img2img_strength}, base start step is {out_start_step}, refiner start is {refiner_start},\n" + 
-                  f"custom00 is {control_net_strength}, custom_01 is {custom_01}, custom_02 is {custom_02}, custom_03 is {custom_03}, width is {width}, height is {height}")
-            return (cfg, steps, img2img_strength, refiner_start, width, height, seed, control_net_strength, custom_01, custom_02, custom_03, outLatent)
+                  f"custom00 is {custom_00}, custom_01 is {custom_01}, custom_02 is {custom_02}, custom_03 is {custom_03}, width is {width}, height is {height}")
+            return (cfg, steps, img2img_strength, refiner_start, width, height, seed, custom_00, custom_01, custom_02, custom_03, outLatent)
         
         
         #set our new seed
@@ -422,10 +422,7 @@ class bd_SettingsDraft:
         out_start_step = math.floor(float(steps) * ran_img2img_strength)
         refiner_start = bd_Settings.calc_refiner(outsteps, refiner_amount)
 
-        out_control_net_strength = bd_Settings.randomize(control_net_strength, variation_amount)
-        out_control_net_strength = bd_Settings.clamp(out_control_net_strength, 0.0, 1.0)     
-
-        # out_custom01 = bd_Settings.randomize(custom_01, variation_amount)
+        out_custom00 = bd_Settings.randomize(custom_00, variation_amount)
         out_custom01 = bd_Settings.randomize(custom_01, variation_amount)
         out_custom02 = bd_Settings.randomize(custom_02, variation_amount)
         out_custom03 = bd_Settings.randomize(custom_03, variation_amount)
@@ -434,9 +431,9 @@ class bd_SettingsDraft:
         print(f"{bcolors.OKCYAN}bd settings:{bcolors.ENDC}\n" +
               f"for variation amount {variation_amount}:\n" + 
               f"seed is {seed}, cfg is {outcfg}, random step amount is {outsteps}, denoise amt is {ran_img2img_strength}, base start step is {out_start_step}, refiner start is {refiner_start},\n" + 
-              f"custom00 is {out_control_net_strength}, custom_01 is {custom_01}, custom_02 is {out_custom02}, custom_03 is {out_custom03}, width is {width}, height is {height}")
+              f"custom00 is {out_custom00}, custom_01 is {custom_01}, custom_02 is {out_custom02}, custom_03 is {out_custom03}, width is {width}, height is {height}")
 
-        return outcfg, outsteps, out_start_step, refiner_start, width, height, seed, out_control_net_strength, out_custom01, out_custom02, out_custom03, outLatent
+        return outcfg, outsteps, out_start_step, refiner_start, width, height, seed, out_custom00, out_custom01, out_custom02, out_custom03, outLatent
 class bd_Sequencer:
     """
     A example node
