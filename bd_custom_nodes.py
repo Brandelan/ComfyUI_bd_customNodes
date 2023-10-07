@@ -292,8 +292,6 @@ class bd_SettingsDraft:
         """
         return {
             "required": {
-                "txt2img": ("LATENT",),
-                "img2img": ("LATENT",),
                 "mode": (["standard", "draft (no variations)", "standard (no variations)", "draft (with variations)"], {"default": "standard"}),
                 "cfg": ("FLOAT", {"default": 6.0, "min": 0.0, "max": 0xffffffffffffffff, "step": 0.01, "display": "number"}),
                 "steps": ("INT", {"default": 30, "min": 0, "max": 0xffffffffffffffff}),
@@ -307,16 +305,12 @@ class bd_SettingsDraft:
                      "12:15 Wide Landscape (1536x640)",
                      ], {"default": "1:1 Square (1024x1024)"}
                      ),                
-                "txt2img_switch": (
-                    ["txt2img", "img2img"], {"default": "txt2img"}
-                )
                 # "output": ("STRING", {
                 #     "multiline": False, #True if you want the field to look like the one on the ClipTextEncode node
                 #     "default": "0"
                 # }),
             },
-            "optional":{                
-                "img2img_strength": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
+            "optional":{
                 "custom_00": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  1.0, "step": 0.01, "display": "number"}),
                 "custom_01": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
                 "custom_02": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
@@ -327,8 +321,8 @@ class bd_SettingsDraft:
             # }
         }
 
-    RETURN_TYPES = ("FLOAT", "INT", "INT", "INT", "INT", "INT", "INT", "FLOAT", "FLOAT", "FLOAT", "FLOAT","LATENT")
-    RETURN_NAMES = ("cfg", "steps", "start at step", "refiner start", "width", "height", "var seed", "custom 00", "custom 01", "custom 02", "custom 03","LATENT")
+    RETURN_TYPES = ("FLOAT", "INT", "INT", "INT", "INT", "INT", "FLOAT", "FLOAT", "FLOAT", "FLOAT")
+    RETURN_NAMES = ("cfg", "steps", "refiner start", "width", "height", "var seed", "custom 00", "custom 01", "custom 02", "custom 03")
     FUNCTION = "randomize_it"
     OUTPUT_NODE = True
     CATEGORY = "bd Nodes"
@@ -360,7 +354,7 @@ class bd_SettingsDraft:
         return refiner_start
     
     @staticmethod
-    def randomize_it(mode, cfg, steps, variation_amount, img2img_strength, seed, refiner_amount, custom_00, custom_01, custom_02, custom_03, aspect_ratio, txt2img_switch, txt2img, img2img):
+    def randomize_it(mode, cfg, steps, variation_amount, seed, refiner_amount, custom_00, custom_01, custom_02, custom_03, aspect_ratio):
 
         draft_amt = .3333
         width = 1024
@@ -395,18 +389,14 @@ class bd_SettingsDraft:
             variation_amount = 0.0
             print(f"Working in standard no variations mode, variation amount reduced to {variation_amount}")
 
-        outLatent = txt2img
-        if(txt2img_switch == "img2img"):
-            outLatent = img2img
-
         #exit early  and just return the settings
         if StaticLibrary.almostEqual(variation_amount, 0):
             refiner_start = bd_Settings.calc_refiner(steps, refiner_amount)
             print(f"{bcolors.OKCYAN}bd settings:{bcolors.ENDC}\n" +
                   f"no variation amount supplied, using supplied values.\n" + 
-                  f"seed is {seed}, cfg is {cfg}, random step amount is {steps}, img2img_strength amt is {img2img_strength}, base start step is {out_start_step}, refiner start is {refiner_start},\n" + 
+                  f"seed is {seed}, cfg is {cfg}, random step amount is {steps}, refiner start is {refiner_start},\n" + 
                   f"custom00 is {custom_00}, custom_01 is {custom_01}, custom_02 is {custom_02}, custom_03 is {custom_03}, width is {width}, height is {height}")
-            return (cfg, steps, img2img_strength, refiner_start, width, height, seed, custom_00, custom_01, custom_02, custom_03, outLatent)
+            return (cfg, steps, refiner_start, width, height, seed, custom_00, custom_01, custom_02, custom_03)
         
         
         #set our new seed
@@ -415,11 +405,7 @@ class bd_SettingsDraft:
         outcfg = bd_Settings.randomize(cfg, variation_amount)
         outcfg = round(outcfg, 2) # make the cfg a bit more simple
         outsteps = math.floor(bd_Settings.randomize(float(steps), variation_amount))
-
-        ran_img2img_strength = bd_Settings.randomize(img2img_strength, variation_amount)
-        ran_img2img_strength = bd_Settings.clamp(ran_img2img_strength, 0.0, 1.0)      
-
-        out_start_step = math.floor(float(steps) * ran_img2img_strength)
+ 
         refiner_start = bd_Settings.calc_refiner(outsteps, refiner_amount)
 
         out_custom00 = bd_Settings.randomize(custom_00, variation_amount)
@@ -430,10 +416,130 @@ class bd_SettingsDraft:
 
         print(f"{bcolors.OKCYAN}bd settings:{bcolors.ENDC}\n" +
               f"for variation amount {variation_amount}:\n" + 
-              f"seed is {seed}, cfg is {outcfg}, random step amount is {outsteps}, denoise amt is {ran_img2img_strength}, base start step is {out_start_step}, refiner start is {refiner_start},\n" + 
+              f"seed is {seed}, cfg is {outcfg}, random step amount is {outsteps}, refiner start is {refiner_start},\n" + 
               f"custom00 is {out_custom00}, custom_01 is {custom_01}, custom_02 is {out_custom02}, custom_03 is {out_custom03}, width is {width}, height is {height}")
 
-        return outcfg, outsteps, out_start_step, refiner_start, width, height, seed, out_custom00, out_custom01, out_custom02, out_custom03, outLatent
+        return outcfg, outsteps,  refiner_start, width, height, seed, out_custom00, out_custom01, out_custom02, out_custom03
+    
+
+
+
+class bd_txt2img:
+    """
+    A example node
+
+    Class methods
+    -------------
+    INPUT_TYPES (dict): 
+        Tell the main program input parameters of nodes.
+
+    Attributes
+    ----------
+    RETURN_TYPES (`tuple`): 
+        The type of each element in the output tulple.
+    RETURN_NAMES (`tuple`):
+        Optional: The name of each output in the output tulple.
+    FUNCTION (`str`):
+        The name of the entry-point method. For example, if `FUNCTION = "execute"` then it will run Example().execute()
+    OUTPUT_NODE ([`bool`]):
+        If this node is an output node that outputs a result/image from the graph. The SaveImage node is an example.
+        The backend iterates on these output nodes and tries to execute all their parents if their parent graph is properly connected.
+        Assumed to be False if not present.
+    CATEGORY (`str`):
+        The category the node should appear in the UI.
+    execute(s) -> tuple || None:
+        The entry point method. The name of this method must be the same as the value of property `FUNCTION`.
+        For example, if `FUNCTION = "execute"` then this method's name must be `execute`, if `FUNCTION = "foo"` then it must be `foo`.
+    """
+    def __init__(self):
+        pass
+    
+    @classmethod
+    def INPUT_TYPES(s):
+        """
+            Return a dictionary which contains config for all input fields.
+            Some types (string): "MODEL", "VAE", "CLIP", "CONDITIONING", "LATENT", "IMAGE", "INT", "STRING", "FLOAT".
+            Input types "INT", "STRING" or "FLOAT" are special values for fields on the node.
+            The type can be a list for selection.
+
+            Returns: `dict`:
+                - Key input_fields_group (`string`): Can be either required, hidden or optional. A node class must have property `required`
+                - Value input_fields (`dict`): Contains input fields config:
+                    * Key field_name (`string`): Name of a entry-point method's argument
+                    * Value field_config (`tuple`):
+                        + First value is a string indicate the type of field or a list for selection.
+                        + Secound value is a config for type "INT", "STRING" or "FLOAT".
+        """
+        return {
+            "required": {
+                "steps": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
+                "txt2img": ("LATENT",),
+                "img2img": ("LATENT",),                
+                "txt2img_switch": (
+                    ["txt2img", "img2img"], {"default": "txt2img"}
+                )
+                # "output": ("STRING", {
+                #     "multiline": False, #True if you want the field to look like the one on the ClipTextEncode node
+                #     "default": "0"
+                # }),
+            },
+            "optional":{                
+                "img2img_strength": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
+            }
+            # "hidden":{
+            #     "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+            # }
+        }
+
+    RETURN_TYPES = ("INT", "LATENT")
+    RETURN_NAMES = ("start at step", "LATENT")
+    FUNCTION = "randomize_it"
+    OUTPUT_NODE = True
+    CATEGORY = "bd Nodes"
+
+    @staticmethod
+    def randomize(base : float, variation_amount: float) -> float: 
+        #get a random number in the range of [-1, 1], then reduce by our variation amount
+        rbase = random.random()
+        rbase = rbase * 2.0 - 1.0
+        rbase *= variation_amount
+
+        outval = base + (base * rbase)
+
+        return outval
+    
+    @staticmethod
+    def clamp(n : float|int, min: float|int, max: float|int) -> float|int:
+        if n < min:
+            return min
+        elif n > max:
+            return max
+        else:
+            return n
+        
+
+    @staticmethod
+    def calc_refiner(steps: int, refiner_amt: float):
+        refiner_start = steps - math.floor(float(steps) * refiner_amt)
+        return refiner_start
+    
+    @staticmethod
+    def randomize_it(steps, img2img_strength, txt2img_switch, txt2img, img2img):
+
+        
+        outLatent = txt2img
+        if(txt2img_switch == "img2img"):
+            outLatent = img2img
+
+        
+
+        out_start_step = math.floor(float(steps) * img2img_strength)
+
+        print(f"{bcolors.OKCYAN}bd settings:{bcolors.ENDC}\n" +
+              f" base start step is {out_start_step}" )
+
+        return  out_start_step, outLatent
+    
 class bd_Sequencer:
     """
     A example node
@@ -569,7 +675,8 @@ NODE_CLASS_MAPPINGS = {
     "BD Random Settings": bd_Settings, #legacy
     "bd Variable Settings": bd_Settings,
     "bd Sequencer": bd_Sequencer,
-    "bd Variable Settings Draft": bd_SettingsDraft
+    "bd Variable Settings Draft": bd_SettingsDraft,
+    "bd Txt2Img" : bd_txt2img,
 }
 
 # A dictionary that contains the friendly/humanly readable titles for the nodes
@@ -578,5 +685,6 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "bd_Settings": "BD Random Settings", #legacy
     "bd_Settings": "bd Variable Settings",
     "bd_Sequencer": "bd Sequencer",
-    "bd_SettingsDraft": "bd Variable Settings Draft"
+    "bd_SettingsDraft": "bd Variable Settings Draft",
+    "bd_txt2img": "bd Txt2Img"
 }
