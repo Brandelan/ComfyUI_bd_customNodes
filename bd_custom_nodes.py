@@ -292,6 +292,8 @@ class bd_SettingsDraft:
         """
         return {
             "required": {
+                "txt2img": ("LATENT",),
+                "img2img": ("LATENT",),
                 "mode": (["standard", "draft (no variations)", "standard (no variations)", "draft (with variations)"], {"default": "standard"}),
                 "cfg": ("FLOAT", {"default": 6.0, "min": 0.0, "max": 0xffffffffffffffff, "step": 0.01, "display": "number"}),
                 "steps": ("INT", {"default": 30, "min": 0, "max": 0xffffffffffffffff}),
@@ -304,7 +306,10 @@ class bd_SettingsDraft:
                      "13:19 Portrait (832x1216)", 
                      "12:15 Wide Landscape (1536x640)",
                      ], {"default": "1:1 Square (1024x1024)"}
-                     ),
+                     ),                
+                "txt2img_switch": (
+                    ["txt2img", "img2img"]
+                )
                 # "output": ("STRING", {
                 #     "multiline": False, #True if you want the field to look like the one on the ClipTextEncode node
                 #     "default": "0"
@@ -322,8 +327,8 @@ class bd_SettingsDraft:
             # }
         }
 
-    RETURN_TYPES = ("FLOAT", "INT", "INT", "INT", "INT", "INT", "INT", "FLOAT", "FLOAT", "FLOAT", "FLOAT")
-    RETURN_NAMES = ("cfg", "steps", "start at step", "refiner start", "width", "height", "var seed", "controlnet strength", "custom 01", "custom 02", "custom 03")
+    RETURN_TYPES = ("FLOAT", "INT", "INT", "INT", "INT", "INT", "INT", "FLOAT", "FLOAT", "FLOAT", "FLOAT","LATENT")
+    RETURN_NAMES = ("cfg", "steps", "start at step", "refiner start", "width", "height", "var seed", "controlnet strength", "custom 01", "custom 02", "custom 03","LATENT")
     FUNCTION = "randomize_it"
     OUTPUT_NODE = True
     CATEGORY = "bd Nodes"
@@ -355,7 +360,7 @@ class bd_SettingsDraft:
         return refiner_start
     
     @staticmethod
-    def randomize_it(mode, cfg, steps, variation_amount, img2img_strength, seed, refiner_amount, control_net_strength, custom_01, custom_02, custom_03, aspect_ratio):
+    def randomize_it(mode, cfg, steps, variation_amount, img2img_strength, seed, refiner_amount, control_net_strength, custom_01, custom_02, custom_03, aspect_ratio, txt2img_switch, txt2img, img2img):
 
         draft_amt = .3333
         width = 1024
@@ -390,6 +395,9 @@ class bd_SettingsDraft:
             variation_amount = 0.0
             print(f"Working in standard no variations mode, variation amount reduced to {variation_amount}")
 
+        outLatent = txt2img
+        if(txt2img_switch == "img2img"):
+            outLatent = img2img
 
         #exit early  and just return the settings
         if StaticLibrary.almostEqual(variation_amount, 0):
@@ -398,7 +406,7 @@ class bd_SettingsDraft:
                   f"no variation amount supplied, using supplied values.\n" + 
                   f"seed is {seed}, cfg is {cfg}, random step amount is {steps}, img2img_strength amt is {img2img_strength}, base start step is {out_start_step}, refiner start is {refiner_start},\n" + 
                   f"custom00 is {control_net_strength}, custom_01 is {custom_01}, custom_02 is {custom_02}, custom_03 is {custom_03}, width is {width}, height is {height}")
-            return (cfg, steps, img2img_strength, refiner_start, width, height, seed, control_net_strength, custom_01, custom_02, custom_03)
+            return (cfg, steps, img2img_strength, refiner_start, width, height, seed, control_net_strength, custom_01, custom_02, custom_03, outLatent)
         
         
         #set our new seed
@@ -428,7 +436,7 @@ class bd_SettingsDraft:
               f"seed is {seed}, cfg is {outcfg}, random step amount is {outsteps}, denoise amt is {ran_img2img_strength}, base start step is {out_start_step}, refiner start is {refiner_start},\n" + 
               f"custom00 is {out_control_net_strength}, custom_01 is {custom_01}, custom_02 is {out_custom02}, custom_03 is {out_custom03}, width is {width}, height is {height}")
 
-        return outcfg, outsteps, out_start_step, refiner_start, width, height, seed, out_control_net_strength, out_custom01, out_custom02, out_custom03
+        return outcfg, outsteps, out_start_step, refiner_start, width, height, seed, out_control_net_strength, out_custom01, out_custom02, out_custom03, outLatent
 class bd_Sequencer:
     """
     A example node
