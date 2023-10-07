@@ -295,7 +295,7 @@ class bd_SettingsDraft:
                 "mode": (["standard", "draft (no variations)", "standard (no variations)", "draft (with variations)"], {"default": "standard"}),
                 "cfg": ("FLOAT", {"default": 6.0, "min": 0.0, "max": 0xffffffffffffffff, "step": 0.01, "display": "number"}),
                 "steps": ("INT", {"default": 30, "min": 0, "max": 0xffffffffffffffff}),
-                "denoise": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
+                "img2img_strength": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
                 "variation_amount": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
                 "refiner_amount": ("FLOAT", {"default": 0.1, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
@@ -357,7 +357,7 @@ class bd_SettingsDraft:
         return refiner_start
     
     @staticmethod
-    def randomize_it(mode, cfg, steps, variation_amount, denoise, seed, refiner_amount, control_net_strength, enable_control_net, custom_02, custom_03, aspect_ratio):
+    def randomize_it(mode, cfg, steps, variation_amount, img2img_strength, seed, refiner_amount, control_net_strength, enable_control_net, custom_02, custom_03, aspect_ratio):
 
         draft_amt = .3333
         width = 1024
@@ -398,9 +398,9 @@ class bd_SettingsDraft:
             refiner_start = bd_Settings.calc_refiner(steps, refiner_amount)
             print(f"{bcolors.OKCYAN}bd settings:{bcolors.ENDC}\n" +
                   f"no variation amount supplied, using supplied values.\n" + 
-                  f"seed is {seed}, cfg is {cfg}, random step amount is {steps}, denoise amt is {denoise}, refiner start is {refiner_start},\n" + 
+                  f"seed is {seed}, cfg is {cfg}, random step amount is {steps}, img2img_strength amt is {img2img_strength}, refiner start is {refiner_start},\n" + 
                   f"custom00 is {control_net_strength}, enable_control_net is {enable_control_net}, custom_02 is {custom_02}, custom_03 is {custom_03}, width is {width}, height is {height}")
-            return (cfg, steps, denoise, refiner_start, width, height, seed, control_net_strength, enable_control_net, custom_02, custom_03)
+            return (cfg, steps, img2img_strength, refiner_start, width, height, seed, control_net_strength, enable_control_net, custom_02, custom_03)
         
         
         #set our new seed
@@ -410,10 +410,10 @@ class bd_SettingsDraft:
         outcfg = round(outcfg, 2) # make the cfg a bit more simple
         outsteps = math.floor(bd_Settings.randomize(float(steps), variation_amount))
 
-        ran_denoise = bd_Settings.randomize(denoise, variation_amount)
-        ran_denoise = bd_Settings.clamp(ran_denoise, 0.0, 1.0)      
+        ran_img2img_strength = bd_Settings.randomize(img2img_strength, variation_amount)
+        ran_img2img_strength = bd_Settings.clamp(ran_img2img_strength, 0.0, 1.0)      
 
-        out_start_step = math.floor(float(steps) * ran_denoise)
+        out_start_step = math.floor(float(steps) * ran_img2img_strength)
         refiner_start = bd_Settings.calc_refiner(outsteps, refiner_amount)
 
         out_control_net_strength = bd_Settings.randomize(control_net_strength, variation_amount)
@@ -426,7 +426,7 @@ class bd_SettingsDraft:
 
         print(f"{bcolors.OKCYAN}bd settings:{bcolors.ENDC}\n" +
               f"for variation amount {variation_amount}:\n" + 
-              f"seed is {seed}, cfg is {outcfg}, random step amount is {outsteps}, denoise amt is {ran_denoise}, refiner start is {refiner_start},\n" + 
+              f"seed is {seed}, cfg is {outcfg}, random step amount is {outsteps}, denoise amt is {ran_img2img_strength}, refiner start is {refiner_start},\n" + 
               f"custom00 is {out_control_net_strength}, enable_control_net is {enable_control_net}, custom_02 is {out_custom02}, custom_03 is {out_custom03}, width is {width}, height is {height}")
 
         return outcfg, outsteps, out_start_step, refiner_start, width, height, seed, out_control_net_strength, enable_control_net, out_custom02, out_custom03
