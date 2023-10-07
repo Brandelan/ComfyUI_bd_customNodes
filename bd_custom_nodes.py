@@ -168,7 +168,7 @@ class bd_Settings:
                 # }),
             },
             "optional":{                
-                "custom_00": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
+                "control_net_strength": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  1.0, "step": 0.01, "display": "number"}),
                 "custom_01": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
                 "custom_02": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
                 "custom_03": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
@@ -179,7 +179,7 @@ class bd_Settings:
         }
 
     RETURN_TYPES = ("FLOAT", "INT", "FLOAT", "INT", "INT", "FLOAT", "FLOAT", "FLOAT", "FLOAT")
-    RETURN_NAMES = ("cfg", "steps", "denoise", "refiner start", "var seed", "custom 00", "custom 01", "custom 02", "custom 03")
+    RETURN_NAMES = ("cfg", "steps", "denoise", "refiner start", "var seed", "controlnet strength", "custom 01", "custom 02", "custom 03")
     FUNCTION = "randomize_it"
     OUTPUT_NODE = True
     CATEGORY = "bd Nodes"
@@ -211,13 +211,13 @@ class bd_Settings:
         return refiner_start
     
     @staticmethod
-    def randomize_it(cfg, steps, variation_amount, denoise, seed, refiner_amount, custom_00, custom_01, custom_02, custom_03):
+    def randomize_it(cfg, steps, variation_amount, denoise, seed, refiner_amount, control_net_strength, custom_01, custom_02, custom_03):
 
         #exit early  and just return the settings
         if StaticLibrary.almostEqual(variation_amount, 0):
             refiner_start = bd_Settings.calc_refiner(steps, refiner_amount)
             print(f"bd settings: no variation amount supplied, using supplied values seed is {seed} cfg is {cfg} and random step amount is {steps}, denoise amt is {denoise}, refiner start is {refiner_start}, custom00 is {custom_00}, custom_01 is {custom_01}, custom_02 is {custom_02}, custom_03 is {custom_03}")
-            return (cfg, steps, denoise, refiner_start, seed, custom_00, custom_01, custom_02, custom_03)
+            return (cfg, steps, denoise, refiner_start, seed, control_net_strength, custom_01, custom_02, custom_03)
         
         
         #set our new seed
@@ -230,7 +230,7 @@ class bd_Settings:
         outdenoise = bd_Settings.clamp(outdenoise, 0.0, 1.0)        
         refiner_start = bd_Settings.calc_refiner(outsteps, refiner_amount)
 
-        out_custom00 = bd_Settings.randomize(custom_00, variation_amount)
+        out_custom00 = bd_Settings.randomize(control_net_strength, variation_amount)
         out_custom01 = bd_Settings.randomize(custom_01, variation_amount)
         out_custom02 = bd_Settings.randomize(custom_02, variation_amount)
         out_custom03 = bd_Settings.randomize(custom_03, variation_amount)
@@ -312,8 +312,10 @@ class bd_SettingsDraft:
                 # }),
             },
             "optional":{                
-                "custom_00": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
-                "custom_01": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
+                "control_net_strength": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  1.0, "step": 0.01, "display": "number"}),
+                "enable_control_net": ([
+                                "On",
+                                "Off"],),
                 "custom_02": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
                 "custom_03": ("FLOAT", {"default": 0.1, "min": 0.0, "max":  0xffffffffffffffff, "step": 0.01, "display": "number"}),
             }
@@ -322,8 +324,8 @@ class bd_SettingsDraft:
             # }
         }
 
-    RETURN_TYPES = ("FLOAT", "INT", "FLOAT", "INT", "INT", "INT", "INT", "FLOAT", "FLOAT", "FLOAT", "FLOAT")
-    RETURN_NAMES = ("cfg", "steps", "denoise", "refiner start", "width", "height", "var seed", "custom 00", "custom 01", "custom 02", "custom 03")
+    RETURN_TYPES = ("FLOAT", "INT", "INT", "INT", "INT", "INT", "INT", "FLOAT", "COMBO", "FLOAT", "FLOAT")
+    RETURN_NAMES = ("cfg", "steps", "start at step", "refiner start", "width", "height", "var seed", "controlnet strength", "enable control net", "custom 02", "custom 03")
     FUNCTION = "randomize_it"
     OUTPUT_NODE = True
     CATEGORY = "bd Nodes"
@@ -355,7 +357,7 @@ class bd_SettingsDraft:
         return refiner_start
     
     @staticmethod
-    def randomize_it(mode, cfg, steps, variation_amount, denoise, seed, refiner_amount, custom_00, custom_01, custom_02, custom_03, aspect_ratio):
+    def randomize_it(mode, cfg, steps, variation_amount, denoise, seed, refiner_amount, control_net_strength, enable_control_net, custom_02, custom_03, aspect_ratio):
 
         draft_amt = .3333
         width = 1024
@@ -397,8 +399,8 @@ class bd_SettingsDraft:
             print(f"{bcolors.OKCYAN}bd settings:{bcolors.ENDC}\n" +
                   f"no variation amount supplied, using supplied values.\n" + 
                   f"seed is {seed}, cfg is {cfg}, random step amount is {steps}, denoise amt is {denoise}, refiner start is {refiner_start},\n" + 
-                  f"custom00 is {custom_00}, custom_01 is {custom_01}, custom_02 is {custom_02}, custom_03 is {custom_03}, width is {width}, height is {height}")
-            return (cfg, steps, denoise, refiner_start, width, height, seed, custom_00, custom_01, custom_02, custom_03)
+                  f"custom00 is {control_net_strength}, enable_control_net is {enable_control_net}, custom_02 is {custom_02}, custom_03 is {custom_03}, width is {width}, height is {height}")
+            return (cfg, steps, denoise, refiner_start, width, height, seed, control_net_strength, enable_control_net, custom_02, custom_03)
         
         
         #set our new seed
@@ -407,22 +409,27 @@ class bd_SettingsDraft:
         outcfg = bd_Settings.randomize(cfg, variation_amount)
         outcfg = round(outcfg, 2) # make the cfg a bit more simple
         outsteps = math.floor(bd_Settings.randomize(float(steps), variation_amount))
-        outdenoise = bd_Settings.randomize(denoise, variation_amount)
-        outdenoise = bd_Settings.clamp(outdenoise, 0.0, 1.0)        
+
+        ran_denoise = bd_Settings.randomize(denoise, variation_amount)
+        ran_denoise = bd_Settings.clamp(ran_denoise, 0.0, 1.0)      
+
+        out_start_step = math.floor(float(steps) * ran_denoise)
         refiner_start = bd_Settings.calc_refiner(outsteps, refiner_amount)
 
-        out_custom00 = bd_Settings.randomize(custom_00, variation_amount)
-        out_custom01 = bd_Settings.randomize(custom_01, variation_amount)
+        out_control_net_strength = bd_Settings.randomize(control_net_strength, variation_amount)
+        out_control_net_strength = bd_Settings.clamp(out_control_net_strength, 0.0, 1.0)     
+
+        # out_custom01 = bd_Settings.randomize(custom_01, variation_amount)
         out_custom02 = bd_Settings.randomize(custom_02, variation_amount)
         out_custom03 = bd_Settings.randomize(custom_03, variation_amount)
 
 
         print(f"{bcolors.OKCYAN}bd settings:{bcolors.ENDC}\n" +
               f"for variation amount {variation_amount}:\n" + 
-              f"seed is {seed}, cfg is {outcfg}, random step amount is {outsteps}, denoise amt is {outdenoise}, refiner start is {refiner_start},\n" + 
-              f"custom00 is {out_custom00}, custom_01 is {out_custom01}, custom_02 is {out_custom02}, custom_03 is {out_custom03}, width is {width}, height is {height}")
+              f"seed is {seed}, cfg is {outcfg}, random step amount is {outsteps}, denoise amt is {ran_denoise}, refiner start is {refiner_start},\n" + 
+              f"custom00 is {out_control_net_strength}, enable_control_net is {enable_control_net}, custom_02 is {out_custom02}, custom_03 is {out_custom03}, width is {width}, height is {height}")
 
-        return outcfg, outsteps, outdenoise, refiner_start, width, height, seed, out_custom00, out_custom01, out_custom02, out_custom03
+        return outcfg, outsteps, out_start_step, refiner_start, width, height, seed, out_control_net_strength, enable_control_net, out_custom02, out_custom03
 class bd_Sequencer:
     """
     A example node
