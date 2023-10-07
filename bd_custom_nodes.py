@@ -528,11 +528,11 @@ class bd_txt2img:
 
         
         outLatent = txt2img
+        out_start_step = 0
         if(txt2img_switch == "img2img"):
-            outLatent = img2img        
-
-        out_start_step = math.floor(float(steps) * img2img_strength)
-
+            outLatent = img2img 
+            out_start_step = math.floor(float(steps) * img2img_strength)
+        
         print(f"{bcolors.OKCYAN}bd settings:{bcolors.ENDC}\n" +
               f" base start step is {out_start_step}" )
 
