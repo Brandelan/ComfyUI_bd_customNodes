@@ -472,7 +472,7 @@ class bd_txt2img:
         """
         return {
             "required": {
-                "steps": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
+                "steps": ("INT", {"default": 30, "min": 0, "max": 0xffffffffffffffff}),
                 "txt2img": ("LATENT",),
                 "img2img": ("LATENT",),                
                 "txt2img_switch": (
@@ -529,9 +529,7 @@ class bd_txt2img:
         
         outLatent = txt2img
         if(txt2img_switch == "img2img"):
-            outLatent = img2img
-
-        
+            outLatent = img2img        
 
         out_start_step = math.floor(float(steps) * img2img_strength)
 
