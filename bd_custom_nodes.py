@@ -424,7 +424,7 @@ class bd_SettingsDraft:
 
 
 
-class bd_txt2img:
+class bd_LatentSwitch:
     """
     A example node
 
@@ -474,9 +474,10 @@ class bd_txt2img:
             "required": {
                 "steps": ("INT", {"default": 30, "min": 0, "max": 0xffffffffffffffff}),
                 "txt2img": ("LATENT",),
-                "img2img": ("LATENT",),                
+                "img2img": ("LATENT",),  
+                "inpainting": ("LATENT",),                
                 "txt2img_switch": (
-                    ["txt2img", "img2img"], {"default": "txt2img"}
+                    ["txt2img", "img2img", "inpainting"], {"default": "txt2img"}
                 )
                 # "output": ("STRING", {
                 #     "multiline": False, #True if you want the field to look like the one on the ClipTextEncode node
@@ -493,38 +494,13 @@ class bd_txt2img:
 
     RETURN_TYPES = ("INT", "LATENT")
     RETURN_NAMES = ("start at step", "LATENT")
-    FUNCTION = "randomize_it"
+    FUNCTION = "main"
     OUTPUT_NODE = True
     CATEGORY = "bd Nodes"
-
-    @staticmethod
-    def randomize(base : float, variation_amount: float) -> float: 
-        #get a random number in the range of [-1, 1], then reduce by our variation amount
-        rbase = random.random()
-        rbase = rbase * 2.0 - 1.0
-        rbase *= variation_amount
-
-        outval = base + (base * rbase)
-
-        return outval
-    
-    @staticmethod
-    def clamp(n : float|int, min: float|int, max: float|int) -> float|int:
-        if n < min:
-            return min
-        elif n > max:
-            return max
-        else:
-            return n
         
-
-    @staticmethod
-    def calc_refiner(steps: int, refiner_amt: float):
-        refiner_start = steps - math.floor(float(steps) * refiner_amt)
-        return refiner_start
     
     @staticmethod
-    def randomize_it(steps, img2img_strength, txt2img_switch, txt2img, img2img):
+    def main(steps, img2img_strength, txt2img_switch, txt2img, img2img, inpainting):
 
         
         outLatent = txt2img
@@ -532,6 +508,8 @@ class bd_txt2img:
         if(txt2img_switch == "img2img"):
             outLatent = img2img 
             out_start_step = math.floor(float(steps) * img2img_strength)
+        if(txt2img_switch == "inpainting"):
+            outLatent = inpainting 
         
         print(f"{bcolors.OKCYAN}bd settings:{bcolors.ENDC}\n" +
               f" base start step is {out_start_step}" )
@@ -674,7 +652,7 @@ NODE_CLASS_MAPPINGS = {
     "bd Variable Settings": bd_Settings,
     "bd Sequencer": bd_Sequencer,
     "bd Variable Settings Draft": bd_SettingsDraft,
-    "bd Txt2Img" : bd_txt2img,
+    "bd Latent Switch" : bd_LatentSwitch,
 }
 
 # A dictionary that contains the friendly/humanly readable titles for the nodes
@@ -684,5 +662,5 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "bd_Settings": "bd Variable Settings",
     "bd_Sequencer": "bd Sequencer",
     "bd_SettingsDraft": "bd Variable Settings Draft",
-    "bd_txt2img": "bd Txt2Img"
+    "bd_LatentSwitch": "bd Latent Switch"
 }
