@@ -485,7 +485,7 @@ class bd_LatentSwitch:
                 # }),
             },
             "optional":{                
-                "img2img_strength": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
+                "denoise": ("FLOAT", {"default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
             }
             # "hidden":{
             #     "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
@@ -500,16 +500,17 @@ class bd_LatentSwitch:
         
     
     @staticmethod
-    def main(steps, img2img_strength, txt2img_switch, txt2img, img2img, inpainting):
+    def main(steps, denoise, txt2img_switch, txt2img, img2img, inpainting):
 
         
         outLatent = txt2img
         out_start_step = 0
         if(txt2img_switch == "img2img"):
             outLatent = img2img 
-            out_start_step = math.floor(float(steps) * img2img_strength)
+            out_start_step = math.floor(float(steps) * denoise)
         if(txt2img_switch == "inpainting"):
             outLatent = inpainting 
+            out_start_step = math.floor(float(steps) * denoise)
         
         print(f"{bcolors.OKCYAN}bd settings:{bcolors.ENDC}\n" +
               f" base start step is {out_start_step}" )
