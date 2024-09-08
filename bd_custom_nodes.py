@@ -300,6 +300,7 @@ class bd_SettingsDraft:
                 "refiner_amount": ("FLOAT", {"default": 0.1, "min": 0.0, "max": 1.0, "step": 0.01, "display": "number"}),
                 "aspect_ratio": (
                     ["1:1 Square (1024x1024)", 
+                     "4:3 IPad (1182x886)", 
                      "7:4 Widescreen (1344x768)", 
                      "13:19 Portrait (832x1216)", 
                      "12:15 Wide Landscape (1536x640)",
@@ -366,6 +367,9 @@ class bd_SettingsDraft:
         if(aspect_ratio == "7:4 Widescreen (1344x768)"):
             width = 1344
             height = 768
+        if(aspect_ratio == "4:3 IPad (1182x886)"):
+            width = 1182
+            height =886
         if(aspect_ratio == "13:19 Portrait (832x1216)"):
             width = 832
             height = 1216
