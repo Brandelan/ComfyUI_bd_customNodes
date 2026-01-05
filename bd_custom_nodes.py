@@ -331,6 +331,51 @@ class bd_Sequencer:
         return "NaN", "NaN", self.seed
     
 
+class bd_IntToString:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "int": ("INT", {}),
+            }
+        }
+
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("string",)
+    FUNCTION = "int_to_string"
+    # OUTPUT_NODE = True
+    CATEGORY = "BD Nodes"
+
+    def int_to_string(self, int):
+        return (str(int), )
+
+    
+# A method to turn floats to strings similar to bd_IntToString
+class bd_FloatToString:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "float": ("FLOAT", {}),
+            }
+        }
+    
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("string",)
+    FUNCTION = "float_to_string"
+    # OUTPUT_NODE = True
+    CATEGORY = "BD Nodes"
+
+    def float_to_string(self, float):
+        return (str(float), )
+    
+
 
 
 
@@ -340,7 +385,9 @@ NODE_CLASS_MAPPINGS = {
     "BD Random Range": bd_RandomRange,
     "BD Random Settings": bd_Settings, #legacy
     "BD Settings": bd_Settings,
-    "BD Sequencer": bd_Sequencer
+    "BD Sequencer": bd_Sequencer,
+    "BD Int to String": bd_IntToString,
+    "BD Float to String": bd_FloatToString,
 }
 
 # A dictionary that contains the friendly/humanly readable titles for the nodes
@@ -348,5 +395,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "bd_FloatRangeSlider": "BD Random Range",
     "bd_RandomizeSettings": "BD Random Settings", #legacy
     "bd_RandomizeSettings": "BD Settings",
-    "bd_Sequencer": "BD Sequencer"
+    "bd_Sequencer": "BD Sequencer",
+    "bd_IntToString": "BD Int to String",
+    "bd_FloatToString": "BD Float to String",
 }
